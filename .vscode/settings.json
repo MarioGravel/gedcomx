@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "https://json-schema.org/draft-07/schema": "file:///d%3A/dev/forks/gedcomx/schema/schema.yaml"
+    }
+}
