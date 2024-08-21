@@ -1,6 +1,17 @@
 # yaml-language-server: $schema=https://json-schema.org/draft-07/schema
 $schema: https://json-schema.org/draft-07/schema
 definitions:
+  ExtensibleData:
+    type: object
+    properties:
+      id:
+        type: string
+      fields:
+        type: array
+        items:
+          $ref: "#/schemas/Field"
+      links:
+        $ref: "#/schemas/Links"
   ResourceReference:
     type: object
     description: The ResourceReference JSON type is used for properties that reference other resources. It uses the resource member to refer to other resources.
@@ -748,19 +759,91 @@ definitions:
   "http://gedcomx.org/v1/Agent":
     $id: "http://gedcomx.org/schemas/v1/Agent"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      identifiers:
+        $ref: "#/schemas/Identifiers"
+      names:
+        type: array
+        items:
+          $ref: "#/schemas/TextValue"
+      homepage:
+        $ref: "#/schemas/ResourceReference"
+      openid:
+        $ref: "#/schemas/ResourceReference"
+      accounts:
+        type: array
+        items:
+          $ref: "#/schemas/OnlineAccount"
+      emails:
+        type: array
+        items:
+          $ref: "#/schemas/ResourceReference"
+      phones:
+        type: array
+        items:
+          $ref: "#/schemas/ResourceReference"
+      addresses:
+        type: array
+        items:
+          $ref: "#/schemas/Address"
+      person:
+        $ref: "#/schemas/ResourceReference"
   "http://gedcomx.org/v1/Attribution":
     $id: "http://gedcomx.org/schemas/v1/Attribution"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      contributor:
+        $ref: "#/schemas/ResourceReference"
+      modified:
+        type: integer
+      changeMessage:
+        type: string
+      creator:
+        $ref: "#/schemas/ResourceReference"
+      created:
+        type: integer
   "http://gedcomx.org/v1/Conclusion":
     $id: "http://gedcomx.org/schemas/v1/Conclusion"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      analysis:
+        $ref: "#/schemas/ResourceReference"
+      attribution:
+        $ref: "#/schemas/Attribution"
+      confidence:
+        type: string
+      id:
+        type: string
+      lang:
+        type: string
+      notes:
+        type: array
+        items:
+          $ref: "#/schemas/Note"
+      sources:
+        type: array
+        items:
+          $ref: "#/schemas/SourceReference"
+      sortKey:
+        type: string
   "http://gedcomx.org/v1/Coverage":
     $id: "http://gedcomx.org/schemas/v1/Coverage"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      spatial:
+        $ref: "#/schemas/PlaceReference"
+      temporal:
+        $ref: "#/schemas/Date"
+      recordType:
+        type: string
   "http://gedcomx.org/v1/Date":
     $id: "http://gedcomx.org/schemas/v1/Date"
     type: object
@@ -768,27 +851,87 @@ definitions:
   "http://gedcomx.org/v1/Document":
     $id: "http://gedcomx.org/schemas/v1/Document"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Conclusion"
+    properties:
+      type:
+        type: string
+      extracted:
+        type: boolean
+      textType:
+        type: string
+      text:
+        type: string
+      attribution:
+        $ref: "#/schemas/Attribution"
   "http://gedcomx.org/v1/Event":
     $id: "http://gedcomx.org/schemas/v1/Event"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Subject"
+    properties:
+      type:
+        type: string
+      date:
+        $ref: "#/schemas/Date"
+      place:
+        $ref: "#/schemas/PlaceReference"
+      roles:
+        type: array
+        items:
+          $ref: "#/schemas/EventRole"
   "http://gedcomx.org/v1/EventRole":
     $id: "http://gedcomx.org/schemas/v1/EventRole"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Conclusion"
+    properties:
+      person:
+        $ref: "#/schemas/ResourceReference"
+      type:
+        type: string
+      details:
+        type: string
   "http://gedcomx.org/v1/EvidenceReference":
     $id: "http://gedcomx.org/schemas/v1/EvidenceReference"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Conclusion"
+    properties:
+      resource:
+        type: string
+      resourceId:
+        type: string
+      attribution:
+        $ref: "#/schemas/Attribution"
   "http://gedcomx.org/v1/Fact":
     $id: "http://gedcomx.org/schemas/v1/Fact"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Conclusion"
+    properties:
+      type:
+        type: string
+      date:
+        $ref: "#/schemas/Date"
+      place:
+        $ref: "#/schemas/PlaceReference"
+      value:
+        type: string
+      qualifiers:
+        type: array
+        items:
+          $ref: "#/schemas/Qualifier"
+      primary:
+        type: boolean
   "http://gedcomx.org/v1/Gender":
     $id: "http://gedcomx.org/schemas/v1/Gender"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Conclusion"
+    properties:
+      type:
+        type: string
   "http://gedcomx.org/v1/Group":
     $id: "http://gedcomx.org/schemas/v1/Group"
     type: object
@@ -800,7 +943,13 @@ definitions:
   "http://gedcomx.org/v1/Identifier":
     $id: "http://gedcomx.org/schemas/v1/Identifier"
     type: object
-    properties: {}
+    patternProperties:
+      .*:
+        anyOf:
+          - type: string
+          - type: array
+            items:
+              type: string
   "http://gedcomx.org/v1/Name":
     $id: "http://gedcomx.org/schemas/v1/Name"
     type: object
@@ -808,11 +957,31 @@ definitions:
   "http://gedcomx.org/v1/NameForm":
     $id: "http://gedcomx.org/schemas/v1/NameForm"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      lang:
+        type: string
+      fullText:
+        type: string
+      parts:
+        type: array
+        items:
+          $ref: "#/schemas/NamePart"
   "http://gedcomx.org/v1/NamePart":
     $id: "http://gedcomx.org/schemas/v1/NamePart"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      type:
+        type: string
+      value:
+        type: string
+      qualifiers:
+        type: array
+        items:
+          $ref: "#/schemas/Qualifier"
   "http://gedcomx.org/v1/Note":
     $id: "http://gedcomx.org/schemas/v1/Note"
     type: object
@@ -820,16 +989,24 @@ definitions:
   "http://gedcomx.org/v1/OnlineAccount":
     $id: "http://gedcomx.org/schemas/v1/OnlineAccount"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      serviceHomePage:
+        $ref: "#/schemas/ResourceReference"
+      accountName:
+        type: string
   "http://gedcomx.org/v1/Person":
     $id: "http://gedcomx.org/schemas/v1/Person"
     $ref: "#/schemas/v1/Subject"
     type: object
+    allOf:
+      - $ref: "#/schemas/Subject"
     properties:
       private:
         type: boolean
       gender:
-        $ref: "#/schemas/v1/Gender"
+        $ref: "#/schemas/Gender"
       names:
         type: array
         items:
@@ -837,47 +1014,195 @@ definitions:
       facts:
         type: array
         items:
-          $ref: "#/schemas/v1/Fact"
+          $ref: "#/schemas/Fact"
+      living:
+        type: boolean
+      display:
+        $ref: "#/schemas/DisplayProperties"
+      principal:
+        type: boolean
   "http://gedcomx.org/v1/PlaceDescription":
     $id: "http://gedcomx.org/schemas/v1/PlaceDescription"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Subject"
+    properties:
+      names:
+        type: array
+        items:
+          $ref: "#/schemas/TextValue"
+      type:
+        type: string
+      place:
+        $ref: "#/schemas/ResourceReference"
+      jurisdiction:
+        $ref: "#/schemas/ResourceReference"
+      latitude:
+        type: number
+      longitude:
+        type: number
+      temporalDescription:
+        $ref: "#/schemas/Date"
+      spatialDescription:
+        $ref: "#/schemas/ResourceReference"
+      display:
+        $ref: "#/schemas/PlaceDisplayProperties"
   "http://gedcomx.org/v1/PlaceReference":
     $id: "http://gedcomx.org/schemas/v1/PlaceReference"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      original:
+        type: string
+      description:
+        type: string
+      normalized:
+        type: array
+        items:
+          $ref: "#/schemas/TextValue"
   "http://gedcomx.org/v1/Qualifier":
     $id: "http://gedcomx.org/schemas/v1/Qualifier"
     type: object
-    properties: {}
-  "http://gedcomx.org/v1/Qualifier](#qualifier)":
-    $id: "http://gedcomx.org/schemas/v1/Qualifier](#qualifier)"
-    type: object
-    properties: {}
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+    required:
+      - name
   "http://gedcomx.org/v1/Relationship":
     $id: "http://gedcomx.org/schemas/v1/Relationship"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Subject"
+    properties:
+      type:
+        type: string
+      person1:
+        $ref: "#/schemas/ResourceReference"
+      person2:
+        $ref: "#/schemas/ResourceReference"
+      facts:
+        type: array
+        items:
+          $ref: "#/schemas/Fact"
   "http://gedcomx.org/v1/SourceCitation":
     $id: "http://gedcomx.org/schemas/v1/SourceCitation"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      lang:
+        type: string
+      value:
+        type: string
   "http://gedcomx.org/v1/SourceDescription":
     $id: "http://gedcomx.org/schemas/v1/SourceDescription"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      resourceType:
+        type: string
+      citations:
+        type: array
+        items:
+          $ref: "#/schemas/SourceCitation"
+      mediaType:
+        type: string
+      about:
+        type: string
+      mediator:
+        $ref: "#/schemas/ResourceReference"
+      sources:
+        type: array
+        items:
+          $ref: "#/schemas/SourceReference"
+      analysis:
+        $ref: "#/schemas/ResourceReference"
+      componentOf:
+        $ref: "#/schemas/SourceReference"
+      titles:
+        type: array
+        items:
+          $ref: "#/schemas/TextValue"
+      notes:
+        type: array
+        items:
+          $ref: "#/schemas/Note"
+      attribution:
+        $ref: "#/schemas/Attribution"
+      rights:
+        type: array
+        items:
+          $ref: "#/schemas/ResourceReference"
+      coverage:
+        type: array
+        items:
+          $ref: "#/schemas/Coverage"
+      descriptions:
+        type: array
+        items:
+          $ref: "#/schemas/TextValue"
+      identifiers:
+        $ref: "#/schemas/Identifiers"
+      created:
+        type: integer
+      modified:
+        type: integer
+      repository:
+        $ref: "#/schemas/ResourceReference"
+      titleLabel:
+        type: string
+      sortKey:
+        type: string
+      descriptor:
+        $ref: "#/schemas/ResourceReference"
+      version:
+        type: string
   "http://gedcomx.org/v1/SourceReference":
     $id: "http://gedcomx.org/schemas/v1/SourceReference"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/ExtensibleData"
+    properties:
+      description:
+        type: string
+      descriptionId:
+        type: string
+      attribution:
+        $ref: "#/schemas/Attribution"
+      qualifiers:
+        type: array
+        items:
+          $ref: "#/schemas/Qualifier"
   "http://gedcomx.org/v1/Subject":
     $id: "http://gedcomx.org/schemas/v1/Subject"
     type: object
-    properties: {}
+    allOf:
+      - $ref: "#/schemas/Conclusion"
+    properties:
+      evidence:
+        type: array
+        items:
+          $ref: "#/schemas/EvidenceReference"
+      extracted:
+        type: boolean
+      identifiers:
+        $ref: "#/schemas/Identifiers"
+      media:
+        type: array
+        items:
+          $ref: "#/schemas/SourceReference"
   "http://gedcomx.org/v1/TextValue":
     $id: "http://gedcomx.org/schemas/v1/TextValue"
     type: object
-    properties: {}
+    properties:
+      lang:
+        type: string
+      value:
+        type: string
   "http://gedcomx.org/xml/v1":
     $id: "http://gedcomx.org/schemas/xml/v1"
     type: object
@@ -936,7 +1261,7 @@ properties:
   names:
     type: array
     items:
-      $ref: "#/schemas/name"
+      $ref: "#/schemas/v1/Name"
   facts:
     type: array
     items:
